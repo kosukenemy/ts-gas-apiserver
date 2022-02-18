@@ -1,15 +1,20 @@
 
-## build
+## ts build
 ```
-yarn run watch
+yarn run watch 
 ```
 
-## push
+## push project
 ```
 yarn push
 ```
 
-## open
+## open project
 ```
 clasp open
+```
+
+## deploy project
+```
+yarn deploy
 ```

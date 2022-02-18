@@ -3,7 +3,8 @@
     "build": "webpack",
     "watch": "webpack -w",
     "compile": "cp appsscript.json dist/appsscript.json && tsc",
-    "push": "yarn compile && clasp push -f"
+    "push": "yarn compile && clasp push -f",
+    "deploy": "yarn push && clasp deploy -i AKfycbwny-RE3sDnqTPODinc4yfZFfEi3IhSANnOgxYO4_5NXaZidrxlSEvpQdsMqEJkFPRT"
   },
   "devDependencies": {
     "ts-loader": "^9.1.2",
