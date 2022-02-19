@@ -1,22 +1,18 @@
+type PostType = {
+  title: string;
+  content: string;
+}
+
 const mySheet = SpreadsheetApp.getActive();
 const defaultSheet:any = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('シート1');
 const sheetHead = ["title", "content"];
 
-const postTestItem = {
-  item: {
-    title: 'タイトル',
-    content: 'タイトル'
-  }
-}
-
 function Test(){
   // insertTemplate('2020-06')
   onPost({
-    item: {
-      title: '支出サンプル',
-      content: '支出サンプル',
-    }
-  })
+    title: '支出サンプル',
+    content: '支出サンプル',
+  });
 }
 
 function insertTemplate (yearMonth:string) {
@@ -32,7 +28,7 @@ function insertTemplate (yearMonth:string) {
   return sheet
 }
 
-function onPost({item} : any) {
+function onPost(item : PostType ) {
   const { title, content } = item;
   const row = ["'" + title, "'" + content]
   defaultSheet.appendRow(row)
