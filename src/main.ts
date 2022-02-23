@@ -1,82 +1,109 @@
-type PostType = {
-  id?: string;
+const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("シート1");
+const authToken = PropertiesService.getScriptProperties().getProperty('authToken') || ''
+
+
+function test () {
+  PropertiesService.getScriptProperties().setProperties({
+    authToken: authToken
+  })
+  console.log(authToken);
+}
+
+function response(message: object){
+  const res = ContentService.createTextOutput();
+  res.setMimeType(ContentService.MimeType.JSON);
+  res.setContent(JSON.stringify(message));
+}
+
+function doGet(){
+  return ContentService.createTextOutput(JSON.stringify(getItem(), null, 2))
+  .setMimeType(ContentService.MimeType.JSON);
+}
+
+interface ObjectType {
+  id: string;
   title: string;
   content: string;
 }
 
-const mySheet = SpreadsheetApp.getActive();
-const sheetName = "シート1"
-const defaultSheet:any = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
-const authToken = PropertiesService.getScriptProperties().getProperty('authToken') || ''
-
-
-function getUniqueStr(myStrong?: number): string {
-  let strong = 1000;
-  if (myStrong) strong = myStrong;
-  return (
-    new Date().getTime().toString(16) +
-    Math.floor(strong * Math.random()).toString(16)
-  );
-}
-const id = getUniqueStr();
-
-function Test(){
-  // onPost({
-  //   id: id,
-  //   title: 'gas',
-  //   content: 'gasを学習する',
-  // });
-  doGet();
-  // onDelete("17f147b040c2ae");
-  // onPut({
-  //   id: "17f14a154e62ff",
-  //   title: 'js',
-  //   content: 'jsを学習する',
-  // })
-}
-
-
-function onPost(item : PostType ) {
-  const { id, title, content } = item;
-  const row = ["'" + id,"'" + title, "'" + content];
-  defaultSheet.appendRow(row);
-}
-
-function getItems(){
-  const rows = defaultSheet.getDataRange().getValues();
+function getItem(){
+  const rows = sheet!.getDataRange().getValues();
   const keys = rows.splice(0,1)[0];
-
-  return rows.map((row: string[]) => {
-    const obj = {};
-    row.forEach((item:string, index: number) => {
-      // @ts-ignore
-      obj[keys[index]] = item;
+  return rows.map((row) => {
+    const obj = {} as ObjectType;
+    row.forEach((item, index) => {
+      const key: keyof ObjectType = keys[index];
+      obj[key] = item;
     });
-    console.log(obj)
     return obj;
   })
 }
 
-function doGet(){
-  return ContentService.createTextOutput(JSON.stringify(getItems(), null, 2))
-  .setMimeType(ContentService.MimeType.JSON);
+function doPost(event: any) {
+  let contents;
+  try {
+    contents = JSON.parse(event.postData.contents);
+    const logger = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("log");
+    logger!.getRange('A1').setValue(event);
+
+    const title = event.parameters["title"];
+    logger!.getRange('A3').setValue(title)
+
+  } catch(event){
+    return response({ error: 'JSONの形式が正しくありません' })
+  }
+
+  if (contents.authToken !== authToken) {
+    return response({ error: '認証に失敗しました' })
+  }
+
+  const { method = '', params = {} } = contents;
+
+  let result;
+  if ( method === "POST" ) {
+    result = onPost(params);
+  }
+  if ( method === "DELETE" ) {
+    result = onDelete(params);
+  }
+  if ( method === "PUT" ) {
+    result = onPut(params);
+  }
+  return result;
+}
+
+
+function onPost(params: ObjectType){
+  const { id, title, content } = params;
+  // シート取得
+  var ss = SpreadsheetApp.openById(SpreadsheetApp.getActiveSpreadsheet().getId());
+  var sheet = ss.getSheetByName("シート1");
+  
+  // データ入力
+  sheet!.appendRow([id, title, content]);
+
+  return ContentService.createTextOutput('ok');
 }
 
 function onDelete(id: string){
-  const lastRow = defaultSheet.getLastRow();
-  const idArray = defaultSheet.getRange('A2:A'+lastRow).getValues().flat();
+  const lastRow = sheet!.getLastRow();
+  const idArray = sheet!.getRange('A2:A'+lastRow).getValues().flat();
 
   const index = idArray.indexOf(id);
-  defaultSheet.deleteRow(2 + index );
+  sheet!.deleteRow(2 + index );
+
+  return ContentService.createTextOutput('ok');
 }
 
-function onPut(item : PostType ){
-  const { id, title, content } = item;
-  const lastRow = defaultSheet.getLastRow();
-  const idArray = defaultSheet.getRange('A1:A'+lastRow).getValues().flat();
+function onPut(params: ObjectType){
+  const { id, title, content } = params;
+  const lastRow = sheet!.getLastRow();
+  const idArray = sheet!.getRange('A1:A'+lastRow).getValues().flat();
 
   const index = idArray.indexOf(id);
   
-  defaultSheet.getRange(2, (index + 1)).setValue(title);
-  defaultSheet.getRange(2, (index + 2)).setValue(content);  
+  sheet!.getRange(2, (index + 1)).setValue(title);
+  sheet!.getRange(2, (index + 2)).setValue(content);  
+
+  return ContentService.createTextOutput('ok');
 }
