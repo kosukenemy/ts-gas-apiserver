@@ -75,11 +75,6 @@ function doPost(event: any) {
 
 function onPost(params: ObjectType){
   const { id, title, content } = params;
-  // シート取得
-  var ss = SpreadsheetApp.openById(SpreadsheetApp.getActiveSpreadsheet().getId());
-  var sheet = ss.getSheetByName("シート1");
-  
-  // データ入力
   sheet!.appendRow([id, title, content]);
 
   return ContentService.createTextOutput('ok');
@@ -89,7 +84,9 @@ function onDelete(id: string){
   const lastRow = sheet!.getLastRow();
   const idArray = sheet!.getRange('A2:A'+lastRow).getValues().flat();
 
+  
   const index = idArray.indexOf(id);
+  if ( index === -1 ) return response({ error: 'idが見つかりません' }) 
   sheet!.deleteRow(2 + index );
 
   return ContentService.createTextOutput('ok');
