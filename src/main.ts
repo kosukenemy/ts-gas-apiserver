@@ -45,8 +45,10 @@ const authToken = PropertiesService.getScriptProperties().getProperty('authToken
 const logger = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("log");
 
 function test () {
-  PropertiesService.getScriptProperties().setProperties({
-    authToken: authToken
+  onPut({
+    id: "17f5942eeaf38b",
+    title: "put タイトル",
+    content: "put コンテント"
   })
 }
 
@@ -173,12 +175,15 @@ function onDelete(id: string){
 function onPut(params: ObjectType){
   const { id, title, content } = params;
   const lastRow = sheet!.getLastRow();
-  const idArray = sheet!.getRange('A1:A'+lastRow).getValues().flat();
+  const idArray = sheet!.getRange('A2:A'+lastRow).getValues().flat();
 
   const index = idArray.indexOf(id);
-  
-  sheet!.getRange(2, (index + 1)).setValue(title);
-  sheet!.getRange(2, (index + 2)).setValue(content);  
+  const titleColumn = 2;
+  const contentColumn = 3;
+  const startRow = 2;
+
+  sheet!.getRange(startRow + index, titleColumn).setValue(title);
+  sheet!.getRange(startRow + index, contentColumn).setValue(content);
 
   return ContentService.createTextOutput('ok');
 }
