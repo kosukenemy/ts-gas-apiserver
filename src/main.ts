@@ -46,9 +46,9 @@ const logger = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("log");
 
 function test () {
   onPut({
-    id: "17f5942eeaf38b",
-    title: "put タイトル",
-    content: "put コンテント"
+    id: "1333f5942eeaf38b",
+    title: "更新",
+    content: "更新"
   })
 }
 
@@ -177,13 +177,15 @@ function onPut(params: ObjectType){
   const lastRow = sheet!.getLastRow();
   const idArray = sheet!.getRange('A2:A'+lastRow).getValues().flat();
 
-  const index = idArray.indexOf(id);
+  const index = idArray.indexOf(id);  
   const titleColumn = 2;
   const contentColumn = 3;
   const startRow = 2;
 
+
   sheet!.getRange(startRow + index, titleColumn).setValue(title);
   sheet!.getRange(startRow + index, contentColumn).setValue(content);
+  sheet!.getRange(7,7).setValue('test')
 
   return ContentService.createTextOutput('ok');
 }
